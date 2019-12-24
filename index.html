@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>home page</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+    </head>
+    <body>
+        <ul data-bind="foreach: links">
+            <li>
+                <a data-bind="
+                    attr: {
+                        href: path,
+                        target: (internal) ? '_self' : 'blank'
+                    },
+                    click: $parent.linkClick, text: label
+                "></a>
+            </li>
+        </ul>
+        <hr>
+        <div data-bind="text: content"></div>
+    </body>
+    <script>
+
+        function App () {
+            let self = this;
+
+            const linkContent = {
+                "/": "Welcome to the home page",
+                "/aboutus": "All about us",
+            }
+
+            self.links = [
+                {label: "Home", path: "/", internal: true},
+                {label: "About Us", path: "/aboutus", internal: true},
+                {label: "Google", path: "https://www.google.com", internal: false}
+            ];
+
+            self.linkClick = (link, e) => {
+                if (e.target.getAttribute ("target") == "blank") {
+                    return true;
+                }
+                e.preventDefault ();
+                history.pushState(link, null, link.path);
+                self.loadContent (link);
+            }
+
+            self.loadContent = link => self.content (linkContent [link.path]);
+
+            self.content = ko.observable ();
+
+
+            // INIT
+
+
+            history.replaceState (self.links [0], null, null);
+            self.loadContent (self.links [0]);
+            window.onpopstate = function (e) { self.loadContent (e.state); }
+        }
+
+        app = new App ();
+
+        ko.applyBindings (app);
+    </script>
+</html>
